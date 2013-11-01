@@ -70,7 +70,7 @@ asciitokey[42]=137
 asciitokey[43]=146
 asciitokey[44]=54
 asciitokey[45]=45
-asciitokey[46]=37
+asciitokey[46]=55
 asciitokey[47]=56
 asciitokey[48]=39
 asciitokey[49]=30
@@ -171,135 +171,135 @@ function modifier {
 		modcode=$(($modcode+1))
 	  ;;
 	  
-	  "ENTER")
-		hexcode="28"	  
+	  "ENTER"|"RETURN")
+		keycode=40	  
 	  ;;	 
 	  
       "ESC"|"ESCAPE")
-		hexcode="29"  
+		keycode=41
 	  ;; 	  
 
       "BACKSPACE")
-		hexcode="2A"  
+		keycode=42  
 	  ;; 	  
 
       "TAB")
-		hexcode="2B"  
+		keycode=43  
 	  ;; 
   
       "SPACE")
-		hexcode="2C" 
+		keycode=44 
 	  ;; 
 	  
 	  "CAPSLOCK")
-		hexcode="39"	  
+		keycode=57	  
 	  ;;
 	  
       "F1")
-		hexcode="3A"  
+		keycode=58  
 	  ;; 
 	  
       "F2")
-		hexcode="3B"  
+		keycode=59  
 	  ;; 
       
 	  "F3")
-		hexcode="3C"  
+		keycode=60  
 	  ;; 
 	  
 	  "F4")
-		hexcode="3D"  
+		keycode=61 
 	  ;; 
 	  
 	  "F5")
-		hexcode="3E"  
+		keycode=62 
 	  ;;
 	  
 	  "F6")
-		hexcode="3F"  
+		keycode=63 
 	  ;;
 	  
 	  "F7")
-		hexcode="40"  
+		keycode=64  
 	  ;;
 	  
 	  "F8")
-		hexcode="41"  
+		keycode=65 
 	  ;;
 	  
 	  "F9")
-		hexcode="42"  
+		keycode=66
 	  ;;
 	  
 	  "F10")
-		hexcode="43"  
+		keycode=67 
 	  ;;
 	  
 	  "F11")
-		hexcode="44"  
+		keycode=68 
 	  ;;	  	  	  
 	  
 	  "F12")
-		hexcode="45"  
+		keycode=69
 	  ;;
 
       "PRINTSCREEN")
-		hexcode="46"	  
+		keycode=70	  
 	  ;; 
 	  
       "SCROLLLOCK")
-		hexcode="47"	  
+		keycode=71	  
 	  ;;
 	  
 	  "BREAK"|"PAUSE")
-		hexcode="48"	  
+		keycode=72	  
 	  ;;  
 	  
       "INSERT")
-		hexcode="49"  
+		keycode=73  
 	  ;; 
 
       "HOME")
-		hexcode="4A"  
+		keycode=74  
 	  ;; 
 	  
       "PAGEUP")
-		hexcode="4B"  
+		keycode=75  
 	  ;; 
 
       "DELETE"|"DEL")
-		hexcode="4C" 
+		keycode=76 
 	  ;; 
   
       "END")
-		hexcode="4D"	  
+		keycode=77	  
 	  ;; 
 	  
       "PAGEDOWN")
-		hexcode="4E"  
+		keycode=78 
 	  ;; 	  
 
       "RIGHTARROW"|"RIGHT")
-		hexcode="4F"  
+		keycode=79  
 	  ;;
 	  
       "LEFTARROW"|"LEFT")
-		hexcode="50"  
+		keycode=80  
 	  ;;	  
       "DOWNARROW"|"DOWN")
-		hexcode="51"	  
+		keycode=81	  
 	  ;;	  
 
       "UPARROW"|"UP")
-		hexcode="52"	  
+		keycode=82	  
 	  ;;
 
 	  "NUMLOCK")
-		hexcode="53"	  
+		keycode=83	  
 	  ;; 
 	  
 	  "MENU"|"APP")
-		hexcode="65"
+		keycode=101
 	  ;;
 
 	  *)
@@ -314,7 +314,6 @@ function modifier {
 		else
 			modcode=$(($modcode+0))
 		fi
-		hexcode=$(printf "%02X" $keycode)
 	  ;;
 	  
 	esac
@@ -322,12 +321,8 @@ function modifier {
 
 echo "The file is $file and the device is $device with a delay of $delay"
 
-cat $file | while IFS= read line; do 
-   modcode=0
-   hexcode=0
-   asciicode=0
-   keycode=0
-   
+cat $file | while IFS= read -r line; do 
+
    #echo $line
 
    type=${line%% *}
@@ -364,9 +359,9 @@ cat $file | while IFS= read line; do
 			hexcode=$(printf "%02X" $keycode)
 			modcode=$(printf "%02X" $modcode)
 
-			echo $modcode
-			echo $hexcode
-			#echo -n "${line:$i:1} "
+			#echo "${line:$i:1} "
+			#echo "$modcode $hexcode"
+
 			#echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00"
 			
 			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" > $device
@@ -375,18 +370,36 @@ cat $file | while IFS= read line; do
 		done
 		;;
 	  
+	  "REPEAT")
+		for i in `seq 1 ${line/$type /}`
+		do
+			echo $i
+			echo "$modcode $hexcode"
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00"
+			
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" > $device
+			millisleep $delay
+			echo "\x00\x00\x00\x00\x00\x00\x00\x00" > $device
+			millisleep $delay
+		done	
+		;;
+	  
       *)  
 		#echo " ==> Not a String or delay"
+		keycode=0
+		modcode=0
 		for command in $line
 		do
 			#echo $command
 			modifier $command
 		done
+		
 		modcode=$(printf "%02X" $modcode)
+		hexcode=$(printf "%02X" $keycode)
 		
 		echo $modcode
 		echo $hexcode
-		#echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" 
+		echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" 
 		
 		echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" > $device
 		millisleep $delay
