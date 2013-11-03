@@ -1,1 +1,0 @@
-STRING this is a test \\of something
