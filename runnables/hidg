@@ -1,0 +1,418 @@
+# Duckyscript interpreter for usb gadget devices
+
+#echo () { :; }
+#slp () { :; }
+
+file=$1
+
+if [ $2 ]; then
+	device=$2
+else
+	device=/dev/hidg0
+fi
+
+if [ $3 ]; then
+	delay=$3
+else
+	delay=100
+fi
+
+asciitokey[0]=0
+asciitokey[1]=0
+asciitokey[2]=0
+asciitokey[3]=0
+asciitokey[4]=0
+asciitokey[5]=0
+asciitokey[6]=0
+asciitokey[7]=0
+asciitokey[8]=0
+asciitokey[9]=43
+asciitokey[10]=0
+asciitokey[11]=0
+asciitokey[12]=0
+asciitokey[13]=0
+asciitokey[14]=0
+asciitokey[15]=0
+asciitokey[16]=0
+asciitokey[17]=0
+asciitokey[18]=0
+asciitokey[19]=0
+asciitokey[20]=0
+asciitokey[21]=0
+asciitokey[22]=0
+asciitokey[23]=0
+asciitokey[24]=0
+asciitokey[25]=0
+asciitokey[26]=0
+asciitokey[27]=0
+asciitokey[28]=0
+asciitokey[29]=0
+asciitokey[30]=0
+asciitokey[31]=0
+asciitokey[32]=44
+asciitokey[33]=130
+asciitokey[34]=131
+asciitokey[35]=49
+asciitokey[36]=133
+asciitokey[37]=134
+asciitokey[38]=136
+asciitokey[39]=149
+asciitokey[40]=137
+asciitokey[41]=138
+asciitokey[42]=148
+asciitokey[43]=48
+asciitokey[44]=54
+asciitokey[45]=56
+asciitokey[46]=55
+asciitokey[47]=136
+asciitokey[48]=39
+asciitokey[49]=30
+asciitokey[50]=31
+asciitokey[51]=32
+asciitokey[52]=33
+asciitokey[53]=34
+asciitokey[54]=35
+asciitokey[55]=36
+asciitokey[56]=37
+asciitokey[57]=38
+asciitokey[58]=155
+asciitokey[59]=154
+asciitokey[60]=100
+asciitokey[61]=139
+asciitokey[62]=200
+asciitokey[63]=145
+asciitokey[64]=220
+asciitokey[65]=104
+asciitokey[66]=105
+asciitokey[67]=106
+asciitokey[68]=107
+asciitokey[69]=108
+asciitokey[70]=109
+asciitokey[71]=110
+asciitokey[72]=111
+asciitokey[73]=112
+asciitokey[74]=113
+asciitokey[75]=114
+asciitokey[76]=115
+asciitokey[77]=116
+asciitokey[78]=117
+asciitokey[79]=118
+asciitokey[80]=119
+asciitokey[81]=120
+asciitokey[82]=121
+asciitokey[83]=122
+asciitokey[84]=123
+asciitokey[85]=124
+asciitokey[86]=125
+asciitokey[87]=126
+asciitokey[88]=127
+asciitokey[89]=129
+asciitokey[90]=128
+asciitokey[91]=237
+asciitokey[92]=245
+asciitokey[93]=238
+asciitokey[94]=53
+asciitokey[95]=156
+asciitokey[96]=146
+asciitokey[97]=4
+asciitokey[98]=5
+asciitokey[99]=6
+asciitokey[100]=7
+asciitokey[101]=8
+asciitokey[102]=9
+asciitokey[103]=10
+asciitokey[104]=11
+asciitokey[105]=12
+asciitokey[106]=13
+asciitokey[107]=14
+asciitokey[108]=15
+asciitokey[109]=16
+asciitokey[110]=17
+asciitokey[111]=18
+asciitokey[112]=19
+asciitokey[113]=20
+asciitokey[114]=21
+asciitokey[115]=22
+asciitokey[116]=23
+asciitokey[117]=24
+asciitokey[118]=25
+asciitokey[119]=26
+asciitokey[120]=27
+asciitokey[121]=29
+asciitokey[122]=28
+asciitokey[123]=236
+asciitokey[124]=300
+asciitokey[125]=239
+asciitokey[126]=248
+asciitokey[127]=0
+
+function modifier {
+	echo -n "$1 ==> "
+	case $1 in
+	  "WINDOWS"|"GUI")
+		keymodcode=$(($keymodcode+128))
+	  ;;
+
+      "ALT")
+		keymodcode=$(($keymodcode+4))
+	  ;;
+
+      "SHIFT")
+		keymodcode=$(($keymodcode+2))
+	  ;;
+      
+	  "CONTROL"|"CTRL")
+		keymodcode=$(($keymodcode+1))
+	  ;;
+	  
+	  "ENTER"|"RETURN")
+		keycode=40	  
+	  ;;	 
+	  
+      "ESC"|"ESCAPE")
+		keycode=41
+	  ;; 	  
+
+      "BACKSPACE")
+		keycode=42  
+	  ;; 	  
+
+      "TAB")
+		keycode=43  
+	  ;; 
+  
+      "SPACE")
+		keycode=44 
+	  ;; 
+	  
+	  "CAPSLOCK")
+		keycode=57	  
+	  ;;
+	  
+      "F1")
+		keycode=58  
+	  ;; 
+	  
+      "F2")
+		keycode=59  
+	  ;; 
+      
+	  "F3")
+		keycode=60  
+	  ;; 
+	  
+	  "F4")
+		keycode=61 
+	  ;; 
+	  
+	  "F5")
+		keycode=62 
+	  ;;
+	  
+	  "F6")
+		keycode=63 
+	  ;;
+	  
+	  "F7")
+		keycode=64  
+	  ;;
+	  
+	  "F8")
+		keycode=65 
+	  ;;
+	  
+	  "F9")
+		keycode=66
+	  ;;
+	  
+	  "F10")
+		keycode=67 
+	  ;;
+	  
+	  "F11")
+		keycode=68 
+	  ;;	  	  	  
+	  
+	  "F12")
+		keycode=69
+	  ;;
+
+      "PRINTSCREEN")
+		keycode=70	  
+	  ;; 
+	  
+      "SCROLLLOCK")
+		keycode=71	  
+	  ;;
+	  
+	  "BREAK"|"PAUSE")
+		keycode=72	  
+	  ;;  
+	  
+      "INSERT")
+		keycode=73  
+	  ;; 
+
+      "HOME")
+		keycode=74  
+	  ;; 
+	  
+      "PAGEUP")
+		keycode=75  
+	  ;; 
+
+      "DELETE"|"DEL")
+		keycode=76 
+	  ;; 
+  
+      "END")
+		keycode=77	  
+	  ;; 
+	  
+      "PAGEDOWN")
+		keycode=78 
+	  ;; 	  
+
+      "RIGHTARROW"|"RIGHT")
+		keycode=79  
+	  ;;
+	  
+      "LEFTARROW"|"LEFT")
+		keycode=80  
+	  ;;	  
+      "DOWNARROW"|"DOWN")
+		keycode=81	  
+	  ;;	  
+
+      "UPARROW"|"UP")
+		keycode=82	  
+	  ;;
+
+	  "NUMLOCK")
+		keycode=83	  
+	  ;; 
+	  
+	  "MENU"|"APP")
+		keycode=101
+	  ;;
+
+	  *)
+		echo PARSING inline string
+		for i in `seq 0 $((${#1}-1))`
+		do
+			hexcode=$(printf "%02X" $keycode)
+			modcode=$(printf "%02X" $keymodcode)
+
+			#echo "$modcode $hexcode"
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00"
+			
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" >$device
+			millisleep $delay
+			echo "\x$modcode\x00\x00\x00\x00\x00\x00\x00" >$device
+			millisleep $delay
+			
+			asciicode=$(printf "%d" "'${1:$i:1}")
+			keycode=${asciitokey[$asciicode]}
+			keycode=$(($keycode % 100))
+			echo -n "${1:$i:1} ==> "
+		done
+	  ;;
+	  
+	esac
+}
+
+function millisleep {
+	slp $1
+}
+
+echo "The file is $file and the device is $device with a delay of $delay"
+
+cat $file | while IFS= read -r line; do 
+
+   #echo $line
+
+   type=${line%% *}
+
+   case $type in
+      
+	  "REM") echo $line
+		;;
+
+      "DEFAULT_DELAY"|"DEFAULTDELAY")
+		delay=${line/$type /}
+		echo " ==> The DEFAULTDELAY is now $delay"
+		;;
+
+      "DELAY") #echo "this causes a delay"
+		echo "DELAY for ${line/$type/} milliseconds"
+		millisleep ${line/$type/}
+		;;
+
+      "STRING")
+		echo STRING
+		line=${line/$type /}
+		for i in `seq 0 $((${#line}-1))`
+		do
+			asciicode=$(printf "%d" "'${line:$i:1}")
+			keycode=${asciitokey[$asciicode]}
+			if [ $keycode -gt 200 ]; then
+				keycode=$(($keycode-200))
+				keymodcode=64
+			elif [ $keycode -gt 100 ]; then
+				keycode=$(($keycode-100))
+				keymodcode=2
+			else
+				keymodcode=0
+			fi
+			hexcode=$(printf "%02X" $keycode)
+			modcode=$(printf "%02X" $keymodcode)
+
+			echo -n "${line:$i:1} ==> "
+			#echo "$modcode $hexcode"
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00"
+			
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" >$device
+			millisleep $delay
+			echo "\x00\x00\x00\x00\x00\x00\x00\x00" >$device
+			millisleep $delay
+		done
+		;;
+	  
+	  "REPEAT")
+		echo REPEAT ${line/$type /} times
+		for i in `seq 1 ${line/$type /}`
+		do
+			echo -n "$i ==> "
+			#echo "$modcode $hexcode"
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00"
+			
+			echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" >$device
+			millisleep $delay
+			echo "\x00\x00\x00\x00\x00\x00\x00\x00" >$device
+			millisleep $delay
+		done	
+		;;
+	  
+      *)
+		keycode=0
+		keymodcode=0
+		for command in $line
+		do
+			modifier $command
+		done
+		hexcode=$(printf "%02X" $keycode)
+		modcode=$(printf "%02X" $keymodcode)
+		
+		#echo "$modcode $hexcode"	
+		echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00"
+			
+		echo "\x$modcode\x00\x$hexcode\x00\x00\x00\x00\x00" >$device
+		millisleep $delay
+		echo "\x$modcode\x00\x00\x00\x00\x00\x00\x00" >$device
+		millisleep $delay
+		echo "\x00\x00\x00\x00\x00\x00\x00\x00" >$device
+		millisleep $delay
+	  ;;
+	esac
+
+done

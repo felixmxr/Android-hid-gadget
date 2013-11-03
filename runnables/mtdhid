@@ -1,0 +1,8 @@
+cd /sys/class/android_usb/android0
+echo 0 > enable
+echo  03eb > idVendor
+echo 2402 > idProduct
+echo Atmel > iManufacturer
+echo Composite > iProduct
+echo mtp,hid > functions
+echo 1 > enable

@@ -1,0 +1,8 @@
+cd /sys/class/android_usb/android0
+echo 0 > enable
+echo  045e > idVendor
+echo fff8 > idProduct
+echo Microsoft Corp. > iManufacturer
+echo Keyboard > iProduct
+echo hid > functions
+echo 1 > enable

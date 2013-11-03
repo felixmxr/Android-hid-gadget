@@ -1,0 +1,4 @@
+STRING test
+DELAY 5000
+STRING this is a test \\of something
+STRING this is a test \\of something
